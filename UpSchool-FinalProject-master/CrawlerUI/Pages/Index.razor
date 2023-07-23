@@ -1,0 +1,59 @@
+﻿@page "/"
+@using System.Text.Json;
+
+<h1>Products</h1>
+
+<TableTemplate Items="products" Context="product">
+    <TableHeader>
+        <th>Name</th>
+        <th>Price</th>
+    </TableHeader>
+    <RowTemplate>
+        @foreach(var product in products)
+        {
+            <td>@product.Name</td>
+            <td>@product.Price</td>
+        }
+    </RowTemplate>
+</TableTemplate>
+
+@code {
+    [Inject]
+    private HttpClient Http { get; set; }
+    private List<Product> products;
+    protected override async Task OnInitializedAsync()
+    {
+        // convert response data to JsonElement which can handle any JSON data
+        var data = await Http.GetFromJsonAsync<List<Product>>("https://localhost:7073/api/Crawler/crawlData/getAllProducts");
+        products = data == null ? new() : data;
+
+    }
+
+    private class Product
+    {
+        public Product(Guid id, string name, string picture, bool isOnSale, decimal price, decimal salePrice)
+        {
+            Id = id;
+            Name = name;
+            Picture = picture;
+            IsOnSale = isOnSale;
+            Price = price;
+            SalePrice = salePrice;
+        }
+
+        public Product()
+        {
+        }
+        public Guid Id { get; set; }
+        public string? Name { get; set; }
+
+        public string? Picture { get; set; }
+
+        public bool IsOnSale { get; set; }
+
+        public decimal Price { get; set; }
+
+        public decimal SalePrice { get; set; }
+
+    }
+}
